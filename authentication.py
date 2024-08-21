@@ -1,4 +1,4 @@
-from data_getter import get_account_credentials
+from data_manager import get_account_credentials
 
 def authentication(login, password):
     """Checks if login and password match with acounts credentials

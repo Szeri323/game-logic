@@ -38,6 +38,7 @@ def create_character(user_characters):
     character = {
         "nick": nick,
         "level": 1,
+        "statistics": {"vitality": 5, "strength": 5, "intelligence": 5, "agility": 5},
         "money": 0,
         "equpiement": [],
         "gear": {

@@ -1,6 +1,6 @@
 from getpass import getpass
 from authentication import authentication
-from data_getter import pick_character
+from data_manager import pick_character
 from game import game
 
 def main():
