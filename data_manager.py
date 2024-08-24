@@ -1,4 +1,28 @@
-from user_accounts import accounts
+#from user_accounts import accounts
+import json
+
+
+def read_json():
+    with open('accounts.json') as f:
+        return json.load(f)
+def write_json(data):
+    with open('accounts.json', "w") as o:
+        json.dump(data, o)
+
+def match_character_with_acoount(login, character):
+    try:
+        accounts = read_json()
+        if len(accounts[login]["characters"]) != 0:
+            for i in range(len(accounts[login]["characters"])):
+                if character["nick"] == accounts[login]["characters"][i]["nick"]:
+                    accounts[login]["characters"][i] = character
+                else:
+                    accounts[login]["characters"].append(character)
+        else:
+            accounts[login]["characters"].append(character)  
+        return accounts
+    except KeyError:
+        return None    
 
 def get_account_credentials(login):
     """Get accounts credentials
@@ -8,12 +32,11 @@ def get_account_credentials(login):
     
     """
     try: 
+        accounts = read_json()
         if accounts[login]:
             return accounts[login]["login"], accounts[login]["password"]
     except KeyError:
         return None
-        
-
 
 def pick_character(login):
     """Pick character or create one.
@@ -22,6 +45,7 @@ def pick_character(login):
     :return: dict - one choosen character which we want to play.
     
     """
+    accounts = read_json()
     user_characters = accounts[login]["characters"]
     if len(user_characters) == 0:
         user_characters = create_character(user_characters) 
