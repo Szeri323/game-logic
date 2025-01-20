@@ -3,18 +3,22 @@ from graphics import show_map
 from keyboard_listener import getkey
 import os
 
+    # implement commands, show P after won fight, back P to last position if lost
+    # implement quests and color if npc has quest
+    # implement spawner and enemys that spawner creates
+
 # Message types:
 system = "system"
 game = "game"
 dialog = "dialog"
 
-
-
 Player = {"symbol": "P", "position": (0,0)}
+Ranger = {"symbol": "R", "quest": True, "position": (0,9)}
+Spawner = {"symbol": "S", "position": (6,6)}
 Forgerer = {"symbol": "F", "position": (1,1)}
-Enemy = {"symbol": "E", "position": (2,2)}
+Enemy = {"symbol": "E", "statistics": {"vitality": 2, "strength": 2}, "position": (2,2)}
 Rock = {"symbol": "r", "position": (3,3)}
-npcs = [Player, Forgerer, Enemy, Rock]
+npcs = [Player, Ranger, Spawner, Forgerer, Enemy, Rock]
 
 def game(character):
     """This main game loop.
@@ -29,6 +33,8 @@ def game(character):
     print_message(f"Hello {character['nick']}, big adventur is wating for you.", game)
     try:
         while True:
+            
+            messages = []
             
             set_on_map(new_map, npcs)
             show_map(new_map)
@@ -51,10 +57,11 @@ def game(character):
                         y-=1
                     for npc in npcs[1:]:
                             if (x, y) == npc["position"]:
-                                if call_event(npc):
+                                if call_event(npc, character):
                                     set_player_position(x, y, new_map)
                                 else:
-                                    print_message("Can't walk to those coordinates.", "game")
+                                    # print_message("Can't walk to those coordinates.", "game")
+                                    messages.append(["Can't walk to those coordinates.", "game"])
                                     if k == 'w':
                                         x+=1
                                         Player["position"] = (x, y)
@@ -70,27 +77,28 @@ def game(character):
                                     
                             else:
                                 set_player_position(x, y, new_map)
-                else:
-                    continue
+                if k == "/":
+                    command = str(input())
+                    if comand_check:
+                        if command == 'show':
+                            param = str(input())
+                            print_message(f"{param}: {character[param]}")
+                        if command == 'money':
+                            print_message(f"money: {character['money']}")
+                        if command == 'exp':
+                            character['level'] += 1
+                        if command == 'job':
+                            character['money'] += 5
+                        if command == 'move':
+                            x = int(input())
+                            y = int(input())
+                for message in messages:
+                    print_message(message[0], message[1])
             
-            # command = str(input())
-            # if comand_check:
-            #     if command == 'show':
-            #         param = str(input())
-            #         print_message(f"{param}: {character[param]}")
-            #     if command == 'money':
-            #         print_message(f"money: {character['money']}")
-            #     if command == 'exp':
-            #         character['level'] += 1
-            #     if command == 'job':
-            #         character['money'] += 5
-            #     if command == 'move':
-            #         x = int(input())
-            #         y = int(input())
                     
-    # implement commands, show P after won fight, back P to last position if lost
             
     except (KeyboardInterrupt, SystemExit):
+        os.system('stty sane')
         return character
     
 def comand_check(command):
@@ -106,14 +114,14 @@ def comand_check(command):
     return False
 
 def init_map(type_of_map):
+    world_map = []
     if type_of_map == "city_map":
-        return [
-            [" ", " ", " ", " ", " "],
-            [" ", " ", " ", " ", " "],
-            [" ", " ", " ", " ", " "],
-            [" ", " ", " ", " ", " "],
-            [" ", " ", " ", " ", " "],
-        ]
+        for i in range(10):
+            world_map.append([])
+            for _ in range(10):
+                world_map[i].append(" ")
+    return world_map
+            
         
 def set_player_position(x, y, new_map):
     """Takes coordinates and sets player position
@@ -132,7 +140,7 @@ def set_on_map(new_map, npcs):
     for npc in npcs:
         new_map[npc["position"][0]][npc["position"][1]] = npc["symbol"]
 
-def call_event(npc):
+def call_event(npc, character):
     if npc["symbol"] == "F":
         print_message("Hello adventurer, how can I help you?", dialog, "Forgerer")
         choice = str(input("upgrade or trade:"))
@@ -146,8 +154,25 @@ def call_event(npc):
             print("Wrong option.")
             return False
     if npc["symbol"] == "E":
-        fight()
-        return True
+        if fight(character, "E"):
+            Enemy = None
+            character["level"] += 1
+            character["money"] += 2
+            print_message("Fight won.", game)
+            return True
+        else:
+            print_message("Fight lost.", game)
+            return False
+    if npc["symbol"] == "S":
+        if fight(character, "S"):
+            Enemy = None
+            character["level"] += 1
+            character["money"] += 2
+            print_message("Fight won.", game)
+            return True
+        else:
+            print_message("Fight lost.", game)
+            return False
     else:
         return False
 
@@ -155,5 +180,18 @@ def trade():
     print("Trade complete.")
 def upgrade():
     print("Upgrade complete.")
-def fight():
-    print("Fight won.")
+def fight(character, enemy_type):
+    if enemy_type == "E":
+        player_value = character["statistics"]["vitality"] + character["statistics"]["strength"]
+        enemy_value = Enemy["statistics"]["vitality"] + Enemy["statistics"]["strength"]
+        if player_value > enemy_value:
+            return True
+        else:
+            return False
+    if enemy_type == "S":
+        npcs.append(Enemy)
+        npcs.append(Enemy)
+        npcs.append(Enemy)
+        npcs.append(Enemy)
+        print(npcs)
+    
