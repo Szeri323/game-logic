@@ -1,7 +1,4 @@
 class Entity:
-    symbol = ""
-    position = (0, 0)
-    
-    def __init__(self, symbol, position):
+    def __init__(self, symbol = "", position = (0, 0)):
         self.symbol = symbol
         self.position = position

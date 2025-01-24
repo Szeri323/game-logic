@@ -6,13 +6,11 @@ def getkey():
     try:
         while True:
             b = os.read(sys.stdin.fileno(), 3).decode()
-            print(b)
             if len(b) == 3:
                 k = ord(b[2])
-            if len(b) == 2:
+            elif len(b) == 2:
                 k = ord(b[1])
             else:
-                print(ord(b))
                 k = ord(b)
             key_mapping = {
                 127: 'backspace',
